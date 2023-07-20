@@ -107,6 +107,8 @@ func runComponent[T component](ctx context.Context,
 		}
 		factory := dependency.NewFactory(localMsg)
 		var err error
+		//components/NewXXXX
+		//新建各个组件实例,然后调用Run
 		role, err = creator(ctx, factory)
 		if localMsg {
 			params.SetLogConfig(typeutil.StandaloneRole)
@@ -117,6 +119,8 @@ func runComponent[T component](ctx context.Context,
 			panic(err)
 		}
 		wg.Done()
+		// cmd/components
+		// 启动各个组件服务
 		_ = role.Run()
 	}()
 	wg.Wait()
@@ -225,19 +229,25 @@ func (mr *MilvusRoles) runIndexNode(ctx context.Context, localMsg bool, alias st
 func (mr *MilvusRoles) Run(local bool, alias string) {
 	log.Info("starting running Milvus components")
 	ctx, cancel := context.WithCancel(context.Background())
+	//_, cancel := context.WithCancel(context.Background())
 	defer func() {
 		// some deferred Stop has race with context cancel
 		cancel()
 	}()
+	//检查环境变量LD_PRELOAD
 	mr.printLDPreLoad()
 
 	// only standalone enable localMsg
 	if local {
+		// standalone模式
 		if err := os.Setenv(metricsinfo.DeployModeEnvKey, metricsinfo.StandaloneDeployMode); err != nil {
 			log.Error("Failed to set deploy mode: ", zap.Error(err))
 		}
+		//读取参数文件config/milvus.yaml
 		Params.Init()
 
+		// rocksPath = /var/lib/milvus/rdb_data
+		// 初始化rocksmq
 		if rocksPath := Params.RocksmqPath(); rocksPath != "" {
 			if err := rocksmqimpl.InitRocksMQ(rocksPath); err != nil {
 				panic(err)
@@ -245,6 +255,7 @@ func (mr *MilvusRoles) Run(local bool, alias string) {
 			defer stopRocksmq()
 		}
 
+		// false 不使用嵌入式etcd
 		if Params.EtcdCfg.UseEmbedEtcd {
 			// Start etcd server.
 			etcd.InitEtcdServer(
@@ -261,8 +272,10 @@ func (mr *MilvusRoles) Run(local bool, alias string) {
 		}
 	}
 
+	// json格式的http response
 	management.ServeHTTP()
 
+	// opentracing分布式追踪
 	if os.Getenv(metricsinfo.DeployModeEnvKey) == metricsinfo.StandaloneDeployMode {
 		closer := trace.InitTracing("standalone")
 		if closer != nil {
@@ -270,6 +283,11 @@ func (mr *MilvusRoles) Run(local bool, alias string) {
 		}
 	}
 
+	// proxy、协调器(RootCoord、QueryCoord、IndexCoord、DataCoord)
+	// 工作节点(QueryNode、IndexNode、DataNode)
+	// 启动有无先后顺序影响?
+
+	// 启动协调器组件RootCoord,内有协程
 	var rc *components.RootCoord
 	if mr.EnableRootCoord {
 		rc = mr.runRootCoord(ctx, local)
@@ -278,62 +296,69 @@ func (mr *MilvusRoles) Run(local bool, alias string) {
 		}
 	}
 
-	var pn *components.Proxy
-	if mr.EnableProxy {
-		pctx := log.WithModule(ctx, "Proxy")
-		pn = mr.runProxy(pctx, local, alias)
-		if pn != nil {
-			defer pn.Stop()
-		}
-	}
+	   // 启动接入层 proxy
+	   var pn *components.Proxy
+	   if mr.EnableProxy {
+	   	pctx := log.WithModule(ctx, "Proxy")
+	   	pn = mr.runProxy(pctx, local, alias)
+	   	if pn != nil {
+	   		defer pn.Stop()
+	   	}
+	   }
 
-	var qs *components.QueryCoord
-	if mr.EnableQueryCoord {
-		qs = mr.runQueryCoord(ctx, local)
-		if qs != nil {
-			defer qs.Stop()
-		}
-	}
+	   // 启动协调器组件QueryCoord
+	   var qs *components.QueryCoord
+	   if mr.EnableQueryCoord {
+	   	qs = mr.runQueryCoord(ctx, local)
+	   	if qs != nil {
+	   		defer qs.Stop()
+	   	}
+	   }
 
-	var qn *components.QueryNode
-	if mr.EnableQueryNode {
-		qn = mr.runQueryNode(ctx, local, alias)
-		if qn != nil {
-			defer qn.Stop()
-		}
-	}
+	   // 启动工作节点QueryNode
+	   var qn *components.QueryNode
+	   if mr.EnableQueryNode {
+	   	qn = mr.runQueryNode(ctx, local, alias)
+	   	if qn != nil {
+	   		defer qn.Stop()
+	   	}
+	   }
 
-	var ds *components.DataCoord
-	if mr.EnableDataCoord {
-		ds = mr.runDataCoord(ctx, local)
-		if ds != nil {
-			defer ds.Stop()
-		}
-	}
+	   // 启动协调器组件DataCoord
+	   var ds *components.DataCoord
+	   if mr.EnableDataCoord {
+	   	ds = mr.runDataCoord(ctx, local)
+	   	if ds != nil {
+	   		defer ds.Stop()
+	   	}
+	   }
 
-	var dn *components.DataNode
-	if mr.EnableDataNode {
-		dn = mr.runDataNode(ctx, local, alias)
-		if dn != nil {
-			defer dn.Stop()
-		}
-	}
+	   // 启动工作节点DataNode
+	   var dn *components.DataNode
+	   if mr.EnableDataNode {
+	   	dn = mr.runDataNode(ctx, local, alias)
+	   	if dn != nil {
+	   		defer dn.Stop()
+	   	}
+	   }
 
-	var is *components.IndexCoord
-	if mr.EnableIndexCoord {
-		is = mr.runIndexCoord(ctx, local)
-		if is != nil {
-			defer is.Stop()
-		}
-	}
+	   // 启动协调器组件IndexCoord
+	   var is *components.IndexCoord
+	   if mr.EnableIndexCoord {
+	   	is = mr.runIndexCoord(ctx, local)
+	   	if is != nil {
+	   		defer is.Stop()
+	   	}
+	   }
 
-	var in *components.IndexNode
-	if mr.EnableIndexNode {
-		in = mr.runIndexNode(ctx, local, alias)
-		if in != nil {
-			defer in.Stop()
-		}
-	}
+	   // 启动工作节点IndexNode
+	   var in *components.IndexNode
+	   if mr.EnableIndexNode {
+	   	in = mr.runIndexNode(ctx, local, alias)
+	   	if in != nil {
+	   		defer in.Stop()
+	   	}
+	   }
 
 	metrics.Register(Registry)
 

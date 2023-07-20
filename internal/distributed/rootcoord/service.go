@@ -151,12 +151,14 @@ func (s *Server) setClient() {
 }
 
 // Run initializes and starts RootCoord's grpc service.
+// grpc服务端
 func (s *Server) Run() error {
+	// RootCoord grpc启动,创建dataCoordClient、indexCoordClient、queryCoordClient
 	if err := s.init(); err != nil {
 		return err
 	}
 	log.Info("RootCoord init done ...")
-
+        //在etcd注册,启动rootCoord
 	if err := s.start(); err != nil {
 		return err
 	}
@@ -281,11 +283,13 @@ func (s *Server) startGrpcLoop(port int) {
 
 func (s *Server) start() error {
 	log.Info("RootCoord Core start ...")
+	// internal/rootcoord/root_coord.go
 	if err := s.rootCoord.Register(); err != nil {
 		log.Error("RootCoord registers service failed", zap.Error(err))
 		return err
 	}
 
+	// 启动rootCoord
 	if err := s.rootCoord.Start(); err != nil {
 		log.Error("RootCoord start service failed", zap.Error(err))
 		return err

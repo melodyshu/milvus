@@ -104,7 +104,9 @@ func (c *run) execute(args []string, flags *flag.FlagSet) {
 		params.GlobalInitWithYaml("embedded-milvus.yaml")
 	}
 
+	// /run/milvus
 	runtimeDir := createRuntimeDir(c.serverType)
+	// standalone.pid
 	filename := getPidFileName(c.serverType, c.svrAlias)
 
 	c.printBanner(flags.Output())
@@ -114,6 +116,8 @@ func (c *run) execute(args []string, flags *flag.FlagSet) {
 		panic(err)
 	}
 	defer removePidFile(lock)
+	// Run Milvus components.
+	// svrAlias为""
 	role.Run(local, c.svrAlias)
 }
 
