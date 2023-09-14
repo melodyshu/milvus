@@ -369,6 +369,7 @@ func (kv *etcdKV) MultiSave(kvs map[string]string) error {
 	defer cancel()
 
 	CheckTnxStringValueSizeAndWarn(kvs)
+	//写入etcd
 	_, err := kv.executeTxn(kv.getTxnWithCmp(ctx), ops...)
 	if err != nil {
 		log.Warn("Etcd MultiSave error", zap.Any("kvs", kvs), zap.Int("len", len(kvs)), zap.Error(err))
