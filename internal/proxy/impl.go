@@ -505,7 +505,7 @@ func (node *Proxy) LoadCollection(ctx context.Context, request *milvuspb.LoadCol
 		zap.String("collection", request.CollectionName),
 		zap.Bool("refreshMode", request.Refresh))
 
-	log.Debug("LoadCollection received")
+	log.Info("LoadCollection received")
 
 	if err := node.sched.ddQueue.Enqueue(lct); err != nil {
 		log.Warn("LoadCollection failed to enqueue",
@@ -516,7 +516,7 @@ func (node *Proxy) LoadCollection(ctx context.Context, request *milvuspb.LoadCol
 		return merr.Status(err), nil
 	}
 
-	log.Debug("LoadCollection enqueued",
+	log.Info("LoadCollection enqueued",
 		zap.Uint64("BeginTS", lct.BeginTs()),
 		zap.Uint64("EndTS", lct.EndTs()))
 
@@ -530,7 +530,7 @@ func (node *Proxy) LoadCollection(ctx context.Context, request *milvuspb.LoadCol
 		return merr.Status(err), nil
 	}
 
-	log.Debug("LoadCollection done",
+	log.Info("LoadCollection done",
 		zap.Uint64("BeginTS", lct.BeginTs()),
 		zap.Uint64("EndTS", lct.EndTs()))
 
