@@ -1409,7 +1409,8 @@ func (lct *loadCollectionTask) Execute(ctx context.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	// check index
+	// check index,获取collection里的索引信息:索引名称、索引类型、索引参数等
+	// 加载collection之前，需要先存在索引
 	indexResponse, err := lct.datacoord.DescribeIndex(ctx, &indexpb.DescribeIndexRequest{
 		CollectionID: collID,
 		IndexName:    "",
@@ -1431,6 +1432,7 @@ func (lct *loadCollectionTask) Execute(ctx context.Context) (err error) {
 			}
 		}
 	}
+	//如果不存在索引，则返回错误
 	if !hasVecIndex {
 		errMsg := fmt.Sprintf("there is no vector index on collection: %s, please create index firstly", lct.LoadCollectionRequest.CollectionName)
 		log.Error(errMsg)
@@ -1451,6 +1453,7 @@ func (lct *loadCollectionTask) Execute(ctx context.Context) (err error) {
 	}
 	log.Debug("send LoadCollectionRequest to query coordinator",
 		zap.Any("schema", request.Schema))
+	//向querycroord发出api操作
 	lct.result, err = lct.queryCoord.LoadCollection(ctx, request)
 	if err != nil {
 		return fmt.Errorf("call query coordinator LoadCollection: %s", err)
