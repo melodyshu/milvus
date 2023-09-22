@@ -565,7 +565,7 @@ func (node *Proxy) ReleaseCollection(ctx context.Context, request *milvuspb.Rele
 		zap.String("db", request.DbName),
 		zap.String("collection", request.CollectionName))
 
-	log.Debug(rpcReceived(method))
+	log.Info(rpcReceived(method))
 
 	if err := node.sched.ddQueue.Enqueue(rct); err != nil {
 		log.Warn(
@@ -577,7 +577,7 @@ func (node *Proxy) ReleaseCollection(ctx context.Context, request *milvuspb.Rele
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcEnqueued(method),
 		zap.Uint64("BeginTS", rct.BeginTs()),
 		zap.Uint64("EndTS", rct.EndTs()))
@@ -594,7 +594,7 @@ func (node *Proxy) ReleaseCollection(ctx context.Context, request *milvuspb.Rele
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcDone(method),
 		zap.Uint64("BeginTS", rct.BeginTs()),
 		zap.Uint64("EndTS", rct.EndTs()))

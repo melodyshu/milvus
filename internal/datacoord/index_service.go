@@ -155,7 +155,7 @@ func (s *Server) CreateIndex(ctx context.Context, req *indexpb.CreateIndexReques
 		return errResp, nil
 	}
 	metrics.IndexRequestCounter.WithLabelValues(metrics.TotalLabel).Inc()
-
+	//分配indexID,indexID=0
 	indexID, err := s.meta.CanCreateIndex(req)
 	if err != nil {
 		log.Error("CreateIndex failed", zap.Error(err))
@@ -165,6 +165,7 @@ func (s *Server) CreateIndex(ctx context.Context, req *indexpb.CreateIndexReques
 	}
 
 	if indexID == 0 {
+		//分配indexID
 		indexID, err = s.allocator.allocID(ctx)
 		if err != nil {
 			log.Warn("failed to alloc indexID", zap.Error(err))
