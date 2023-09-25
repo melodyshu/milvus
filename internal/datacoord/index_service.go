@@ -205,6 +205,7 @@ func (s *Server) CreateIndex(ctx context.Context, req *indexpb.CreateIndexReques
 		return errResp, nil
 	}
 
+	// 将collectionID发生到channel,其它的goroutine进行消费。
 	select {
 	case s.notifyIndexChan <- req.GetCollectionID():
 	default:
