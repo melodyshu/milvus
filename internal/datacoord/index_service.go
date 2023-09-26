@@ -108,6 +108,7 @@ func (s *Server) createIndexForSegmentLoop(ctx context.Context) {
 			}
 		case collectionID := <-s.notifyIndexChan:
 			log.Info("receive create index notify", zap.Int64("collectionID", collectionID))
+			//获取collection的segment信息
 			segments := s.meta.SelectSegments(func(info *SegmentInfo) bool {
 				return isFlush(info) && collectionID == info.CollectionID
 			})
