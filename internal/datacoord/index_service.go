@@ -74,6 +74,7 @@ func (s *Server) createIndexForSegment(segment *SegmentInfo, indexID UniqueID) e
 }
 
 func (s *Server) createIndexesForSegment(segment *SegmentInfo) error {
+	//要创建的索引的信息：索引名称，维度等信息
 	indexes := s.meta.GetIndexesForCollection(segment.CollectionID, "")
 	for _, index := range indexes {
 		if _, ok := segment.segmentIndexes[index.IndexID]; !ok {
