@@ -69,6 +69,7 @@ func (s *Server) createIndexForSegment(segment *SegmentInfo, indexID UniqueID) e
 	if err = s.meta.AddSegmentIndex(segIndex); err != nil {
 		return err
 	}
+	// 入队，通知IndexNode执行索引创建任务
 	s.indexBuilder.enqueue(buildID)
 	return nil
 }
