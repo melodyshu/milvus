@@ -271,6 +271,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		typeParams := ib.meta.GetTypeParams(meta.CollectionID, meta.IndexID)
 
 		var storageConfig *indexpb.StorageConfig
+		// 获取元数据存储类型：minio
 		if Params.CommonCfg.StorageType.GetValue() == "local" {
 			storageConfig = &indexpb.StorageConfig{
 				RootPath:    Params.LocalStorageCfg.Path.GetValue(),
