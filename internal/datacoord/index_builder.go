@@ -303,6 +303,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 			TypeParams:      typeParams,
 			NumRows:         meta.NumRows,
 		}
+		// 通知IndexNode创建索引
 		if err := ib.assignTask(client, req); err != nil {
 			// need to release lock then reassign, so set task state to retry
 			log.Ctx(ib.ctx).Warn("index builder assign task to IndexNode failed", zap.Int64("buildID", buildID),
@@ -312,7 +313,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		}
 		log.Ctx(ib.ctx).Info("index task assigned successfully", zap.Int64("buildID", buildID),
 			zap.Int64("segmentID", meta.SegmentID), zap.Int64("nodeID", nodeID))
-		// update index meta state to InProgress
+		// 更新索引状态，update index meta state to InProgress
 		if err := ib.meta.BuildIndex(buildID); err != nil {
 			// need to release lock then reassign, so set task state to retry
 			log.Ctx(ib.ctx).Warn("index builder update index meta to InProgress failed", zap.Int64("buildID", buildID),
