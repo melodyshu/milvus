@@ -362,6 +362,7 @@ func (it *indexBuildTask) SaveIndexFiles(ctx context.Context) error {
 			log.Ctx(ctx).Error("IndexNode indexBuildTask Execute CIndexDelete failed", zap.Error(err))
 		}
 	}
+	// 上传索引文件到s3
 	indexFilePath2Size, err := it.index.UpLoad()
 	if err != nil {
 		log.Ctx(ctx).Error("failed to upload index", zap.Error(err))

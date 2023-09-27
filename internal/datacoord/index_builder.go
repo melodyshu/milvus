@@ -257,6 +257,9 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 			return false
 		}
 
+		// binLogs为向量数据文件的位置信息
+		// files/insert_log/444517122896489678/444517122896489679/444517122896489694/102/444517122896236031
+		// files/insert_log/{collectionID}/{partitionID}/{segmentID}/{fieldID}/444517122896236031
 		binLogs := make([]string, 0)
 		fieldID := ib.meta.GetFieldIDByIndexID(meta.CollectionID, meta.IndexID)
 		for _, fieldBinLog := range segment.GetBinlogs() {
