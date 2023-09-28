@@ -66,6 +66,8 @@ func (s *Server) createIndexForSegment(segment *SegmentInfo, indexID UniqueID) e
 		CreateTime:   uint64(segment.ID),
 		WriteHandoff: false,
 	}
+	// 添加segment-index
+	// 前缀/segment-index/{collectionID}/{partitionID}/{segmentID}/{buildID}
 	if err = s.meta.AddSegmentIndex(segIndex); err != nil {
 		return err
 	}
