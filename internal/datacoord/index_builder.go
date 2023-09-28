@@ -215,6 +215,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		return true
 	}
 
+	// 有一个定时器，默认1秒，配置项indexCoord.scheduler.interval
 	switch state {
 	case indexTaskInit:
 		segment := ib.meta.GetSegment(meta.SegmentID)
