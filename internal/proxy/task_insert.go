@@ -247,8 +247,10 @@ func (it *insertTask) Execute(ctx context.Context) error {
 		zap.Duration("get msgStream duration", getMsgStreamDur))
 
 	// assign segmentID for insert data and repack data by segmentID
+	// msgPck包含segmentID
 	var msgPack *msgstream.MsgPack
 	if it.partitionKeys == nil {
+		// 分配segmentID
 		msgPack, err = repackInsertData(it.TraceCtx(), channelNames, it.insertMsg, it.result, it.idAllocator, it.segIDAssigner)
 	} else {
 		msgPack, err = repackInsertDataWithPartitionKey(it.TraceCtx(), channelNames, it.partitionKeys, it.insertMsg, it.result, it.idAllocator, it.segIDAssigner)
