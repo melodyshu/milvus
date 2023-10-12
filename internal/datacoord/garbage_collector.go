@@ -289,12 +289,14 @@ func (gc *garbageCollector) clearEtcd() {
 		}
 
 		segInsertChannel := segment.GetInsertChannel()
+		//判断是否可以删除segment
 		if !gc.checkDroppedSegmentGC(segment, compactTo[segment.GetID()], indexedSet, channelCPs[segInsertChannel]) {
 			continue
 		}
 
 		logs := getLogs(segment)
 		log.Info("GC segment", zap.Int64("segmentID", segment.GetID()))
+		//删除binlog
 		if gc.removeLogs(logs) {
 			err := gc.meta.DropSegment(segment.GetID())
 			if err != nil {
