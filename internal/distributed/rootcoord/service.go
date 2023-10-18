@@ -202,10 +202,12 @@ func (s *Server) init() error {
 		log.Debug("RootCoord start to create DataCoord client")
 		dataCoord := s.newDataCoordClient(rootcoord.Params.EtcdCfg.MetaRootPath.GetValue(), s.etcdCli)
 		s.dataCoord = dataCoord
+		// 初始化dataCoord的客户端，写死返回nil
 		if err = s.dataCoord.Init(); err != nil {
 			log.Error("RootCoord DataCoordClient Init failed", zap.Error(err))
 			panic(err)
 		}
+		// 启动dataCoord的客户端，写死返回nil
 		if err = s.dataCoord.Start(); err != nil {
 			log.Error("RootCoord DataCoordClient Start failed", zap.Error(err))
 			panic(err)
@@ -219,10 +221,12 @@ func (s *Server) init() error {
 		log.Debug("RootCoord start to create QueryCoord client")
 		queryCoord := s.newQueryCoordClient(rootcoord.Params.EtcdCfg.MetaRootPath.GetValue(), s.etcdCli)
 		s.queryCoord = queryCoord
+		// 初始化queryCoord的客户端，写死返回nil
 		if err := s.queryCoord.Init(); err != nil {
 			log.Error("RootCoord QueryCoordClient Init failed", zap.Error(err))
 			panic(err)
 		}
+		// 启动queryCoord的客户端，写死返回nil
 		if err := s.queryCoord.Start(); err != nil {
 			log.Error("RootCoord QueryCoordClient Start failed", zap.Error(err))
 			panic(err)
