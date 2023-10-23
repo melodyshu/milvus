@@ -178,6 +178,7 @@ func newDmlChannels(ctx context.Context, factory msgstream.Factory, chanNamePref
 	}
 
 	for i, name := range names {
+		//如果mq设置为pulsar,factory为DefaultFactory->PmsFactory
 		ms, err := factory.NewMsgStream(ctx)
 		if err != nil {
 			log.Error("Failed to add msgstream",
