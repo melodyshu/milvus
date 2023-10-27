@@ -66,14 +66,18 @@ func (s *Server) createIndexForSegment(segment *SegmentInfo, indexID UniqueID) e
 		CreateTime:   uint64(segment.ID),
 		WriteHandoff: false,
 	}
+	// 添加segment-index
+	// 前缀/segment-index/{collectionID}/{partitionID}/{segmentID}/{buildID}
 	if err = s.meta.AddSegmentIndex(segIndex); err != nil {
 		return err
 	}
+	// 入队，通知IndexNode执行索引创建任务
 	s.indexBuilder.enqueue(buildID)
 	return nil
 }
 
 func (s *Server) createIndexesForSegment(segment *SegmentInfo) error {
+	// 要创建的索引的信息：索引名称，维度等信息
 	indexes := s.meta.GetIndexesForCollection(segment.CollectionID, "")
 	for _, index := range indexes {
 		if _, ok := segment.segmentIndexes[index.IndexID]; !ok {
@@ -108,6 +112,7 @@ func (s *Server) createIndexForSegmentLoop(ctx context.Context) {
 			}
 		case collectionID := <-s.notifyIndexChan:
 			log.Info("receive create index notify", zap.Int64("collectionID", collectionID))
+			// 获取collection的segment信息
 			segments := s.meta.SelectSegments(func(info *SegmentInfo) bool {
 				return isFlush(info) && collectionID == info.CollectionID
 			})
@@ -155,7 +160,7 @@ func (s *Server) CreateIndex(ctx context.Context, req *indexpb.CreateIndexReques
 		return errResp, nil
 	}
 	metrics.IndexRequestCounter.WithLabelValues(metrics.TotalLabel).Inc()
-
+	// 分配indexID,indexID=0
 	indexID, err := s.meta.CanCreateIndex(req)
 	if err != nil {
 		log.Error("CreateIndex failed", zap.Error(err))
@@ -165,6 +170,7 @@ func (s *Server) CreateIndex(ctx context.Context, req *indexpb.CreateIndexReques
 	}
 
 	if indexID == 0 {
+		// 分配indexID
 		indexID, err = s.allocator.allocID(ctx)
 		if err != nil {
 			log.Warn("failed to alloc indexID", zap.Error(err))
@@ -203,7 +209,7 @@ func (s *Server) CreateIndex(ctx context.Context, req *indexpb.CreateIndexReques
 		metrics.IndexRequestCounter.WithLabelValues(metrics.FailLabel).Inc()
 		return errResp, nil
 	}
-
+	// 将collectionID发生到channel,其它的goroutine进行消费。
 	select {
 	case s.notifyIndexChan <- req.GetCollectionID():
 	default:

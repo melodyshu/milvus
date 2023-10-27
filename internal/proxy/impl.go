@@ -315,7 +315,7 @@ func (node *Proxy) CreateCollection(ctx context.Context, request *milvuspb.Creat
 		zap.Int32("shards_num", request.ShardsNum),
 		zap.String("consistency_level", request.ConsistencyLevel.String()))
 
-	log.Debug(rpcReceived(method))
+	log.Info(rpcReceived(method))
 
 	if err := node.sched.ddQueue.Enqueue(cct); err != nil {
 		log.Warn(
@@ -326,7 +326,7 @@ func (node *Proxy) CreateCollection(ctx context.Context, request *milvuspb.Creat
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcEnqueued(method),
 		zap.Uint64("BeginTs", cct.BeginTs()),
 		zap.Uint64("EndTs", cct.EndTs()),
@@ -343,7 +343,7 @@ func (node *Proxy) CreateCollection(ctx context.Context, request *milvuspb.Creat
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcDone(method),
 		zap.Uint64("BeginTs", cct.BeginTs()),
 		zap.Uint64("EndTs", cct.EndTs()))
@@ -505,7 +505,7 @@ func (node *Proxy) LoadCollection(ctx context.Context, request *milvuspb.LoadCol
 		zap.String("collection", request.CollectionName),
 		zap.Bool("refreshMode", request.Refresh))
 
-	log.Debug("LoadCollection received")
+	log.Info("LoadCollection received")
 
 	if err := node.sched.ddQueue.Enqueue(lct); err != nil {
 		log.Warn("LoadCollection failed to enqueue",
@@ -516,7 +516,7 @@ func (node *Proxy) LoadCollection(ctx context.Context, request *milvuspb.LoadCol
 		return merr.Status(err), nil
 	}
 
-	log.Debug("LoadCollection enqueued",
+	log.Info("LoadCollection enqueued",
 		zap.Uint64("BeginTS", lct.BeginTs()),
 		zap.Uint64("EndTS", lct.EndTs()))
 
@@ -530,7 +530,7 @@ func (node *Proxy) LoadCollection(ctx context.Context, request *milvuspb.LoadCol
 		return merr.Status(err), nil
 	}
 
-	log.Debug("LoadCollection done",
+	log.Info("LoadCollection done",
 		zap.Uint64("BeginTS", lct.BeginTs()),
 		zap.Uint64("EndTS", lct.EndTs()))
 
@@ -565,7 +565,7 @@ func (node *Proxy) ReleaseCollection(ctx context.Context, request *milvuspb.Rele
 		zap.String("db", request.DbName),
 		zap.String("collection", request.CollectionName))
 
-	log.Debug(rpcReceived(method))
+	log.Info(rpcReceived(method))
 
 	if err := node.sched.ddQueue.Enqueue(rct); err != nil {
 		log.Warn(
@@ -577,7 +577,7 @@ func (node *Proxy) ReleaseCollection(ctx context.Context, request *milvuspb.Rele
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcEnqueued(method),
 		zap.Uint64("BeginTS", rct.BeginTs()),
 		zap.Uint64("EndTS", rct.EndTs()))
@@ -594,7 +594,7 @@ func (node *Proxy) ReleaseCollection(ctx context.Context, request *milvuspb.Rele
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcDone(method),
 		zap.Uint64("BeginTS", rct.BeginTs()),
 		zap.Uint64("EndTS", rct.EndTs()))
@@ -2166,7 +2166,7 @@ func (node *Proxy) Insert(ctx context.Context, request *milvuspb.InsertRequest) 
 		}
 	}
 
-	log.Debug("Enqueue insert request in Proxy")
+	log.Info("Enqueue insert request in Proxy")
 
 	if err := node.sched.dmQueue.Enqueue(it); err != nil {
 		log.Warn("Failed to enqueue insert task: " + err.Error())
@@ -2175,7 +2175,7 @@ func (node *Proxy) Insert(ctx context.Context, request *milvuspb.InsertRequest) 
 		return constructFailedResponse(err), nil
 	}
 
-	log.Debug("Detail of insert request in Proxy")
+	log.Info("Detail of insert request in Proxy")
 
 	if err := it.WaitToFinish(); err != nil {
 		log.Warn("Failed to execute insert task in task scheduler: " + err.Error())
@@ -2575,7 +2575,7 @@ func (node *Proxy) Flush(ctx context.Context, request *milvuspb.FlushRequest) (*
 		zap.String("db", request.DbName),
 		zap.Any("collections", request.CollectionNames))
 
-	log.Debug(rpcReceived(method))
+	log.Info(rpcReceived(method))
 
 	if err := node.sched.ddQueue.Enqueue(ft); err != nil {
 		log.Warn(
@@ -2588,7 +2588,7 @@ func (node *Proxy) Flush(ctx context.Context, request *milvuspb.FlushRequest) (*
 		return resp, nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcEnqueued(method),
 		zap.Uint64("BeginTs", ft.BeginTs()),
 		zap.Uint64("EndTs", ft.EndTs()))
@@ -2607,7 +2607,7 @@ func (node *Proxy) Flush(ctx context.Context, request *milvuspb.FlushRequest) (*
 		return resp, nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcDone(method),
 		zap.Uint64("BeginTs", ft.BeginTs()),
 		zap.Uint64("EndTs", ft.EndTs()))

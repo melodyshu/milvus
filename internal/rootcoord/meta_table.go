@@ -623,6 +623,7 @@ func (mt *MetaTable) ListCollections(ctx context.Context, dbName string, ts Time
 	mt.ddLock.RLock()
 	defer mt.ddLock.RUnlock()
 
+	// 从缓存中取数,避免读取etcd
 	if isMaxTs(ts) {
 		return mt.listCollectionFromCache(dbName, onlyAvail)
 	}
