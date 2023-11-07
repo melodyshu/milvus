@@ -448,6 +448,7 @@ func (kc *Catalog) DropSegment(ctx context.Context, segment *datapb.SegmentInfo)
 }
 
 func (kc *Catalog) MarkChannelAdded(ctx context.Context, channel string) error {
+	// datacoord-meta/channel-removal/by-dev-rootcoord-dml_0_445475002557923452v0
 	key := buildChannelRemovePath(channel)
 	err := kc.MetaKv.Save(key, NonRemoveFlagTomestone)
 	if err != nil {
