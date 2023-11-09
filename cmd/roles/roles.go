@@ -370,6 +370,7 @@ func (mr *MilvusRoles) Run(alias string) {
 	wg.Wait()
 	// 读取配置文件切换日志级别
 	mr.setupLogger()
+	// 设置分布式跟踪otel
 	tracer.Init()
 	setupPrometheusHTTPServer(Registry)
 
