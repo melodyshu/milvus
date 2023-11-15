@@ -400,13 +400,17 @@ func (t *createCollectionTask) getCreateTs() (uint64, error) {
 }
 
 func (t *createCollectionTask) Execute(ctx context.Context) error {
+	// collID为collectionID,在Prepare()里已经分配
+	// partIDs为partitionID,在Prepare()里已经分配
 	collID := t.collID
 	partIDs := t.partIDs
+	// 产生时间戳
 	ts, err := t.getCreateTs()
 	if err != nil {
 		return err
 	}
-
+	// vchanNames为虚拟channel,在Prepare()里已经分配
+	// chanNames为物理channel,在Prepare()里已经分配
 	vchanNames := t.channels.virtualChannels
 	chanNames := t.channels.physicalChannels
 
@@ -416,7 +420,7 @@ func (t *createCollectionTask) Execute(ctx context.Context) error {
 		t.core.chanTimeTick.removeDmlChannels(t.channels.physicalChannels...)
 		return err
 	}
-
+	// 填充partition,创建collection的时候,默认只有一个名为"Default partition"的partition。
 	partitions := make([]*model.Partition, len(partIDs))
 	for i, partID := range partIDs {
 		partitions[i] = &model.Partition{
@@ -427,7 +431,8 @@ func (t *createCollectionTask) Execute(ctx context.Context) error {
 			State:                     pb.PartitionState_PartitionCreated,
 		}
 	}
-
+	// 填充collection
+	// 可以看出collection由collID、dbid、schemaName、fields、vchanName、chanName、partition、shardNum等组成
 	collInfo := model.Collection{
 		CollectionID:         collID,
 		DBID:                 t.dbID,
@@ -462,7 +467,8 @@ func (t *createCollectionTask) Execute(ctx context.Context) error {
 		log.Warn("add duplicate collection", zap.String("collection", t.Req.GetCollectionName()), zap.Uint64("ts", ts))
 		return nil
 	}
-
+	// 分为多个step执行，每一个undoTask由todoStep和undoStep构成
+	// 执行todoStep,报错则执行undoStep
 	undoTask := newBaseUndoTask(t.core.stepExecutor)
 	undoTask.AddStep(&expireCacheStep{
 		baseStep:        baseStep{core: t.core},
