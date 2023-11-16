@@ -191,7 +191,10 @@ func (c *ChannelStore) Update(opSet ChannelOpSet) error {
 	for _, op := range opSet {
 		totalChannelNum += len(op.Channels)
 	}
+	// totalChannelNum = 1
+	// maxOperationsPerTxn = 64
 	if totalChannelNum <= maxOperationsPerTxn {
+		// 走这条路径
 		return c.update(opSet)
 	}
 	// Split opset into multiple txn. Operations on the same channel must be executed in one txn.
@@ -244,6 +247,7 @@ func (c *ChannelStore) checkIfExist(nodeID int64, channel *channel) bool {
 // update applies the ADD/DELETE operations to the current channel store.
 func (c *ChannelStore) update(opSet ChannelOpSet) error {
 	// Update ChannelStore's kv store.
+	// 操作etcd
 	if err := c.txn(opSet); err != nil {
 		return err
 	}
@@ -367,9 +371,11 @@ func (c *ChannelStore) txn(opSet ChannelOpSet) error {
 	var removals []string
 	for _, op := range opSet {
 		for i, ch := range op.Channels {
+			// 构建key的规则
 			k := buildNodeChannelKey(op.NodeID, ch.Name)
 			switch op.Type {
 			case Add:
+				// 构建value,ChannelWatchInfo
 				info, err := proto.Marshal(op.ChannelWatchInfos[i])
 				if err != nil {
 					return err

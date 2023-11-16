@@ -435,7 +435,7 @@ func (c *ChannelManager) Watch(ctx context.Context, ch *channel) error {
 	log := log.Ctx(ctx)
 	c.mu.Lock()
 	defer c.mu.Unlock()
-
+	// 使用分配策略:datacoord.AverageAssignPolicy
 	updates := c.assignPolicy(c.store, []*channel{ch})
 	if len(updates) == 0 {
 		return nil
@@ -443,7 +443,7 @@ func (c *ChannelManager) Watch(ctx context.Context, ch *channel) error {
 	log.Info("try to update channel watch info with ToWatch state",
 		zap.String("channel", ch.String()),
 		zap.Array("updates", updates))
-
+	// 操作etcd
 	err := c.updateWithTimer(updates, datapb.ChannelWatchState_ToWatch)
 	if err != nil {
 		log.Warn("fail to update channel watch info with ToWatch state",
@@ -622,12 +622,14 @@ type ackEvent struct {
 
 func (c *ChannelManager) updateWithTimer(updates ChannelOpSet, state datapb.ChannelWatchState) error {
 	channelsWithTimer := []string{}
+	// updates此时数组长度为1
 	for _, op := range updates {
 		if op.Type == Add {
+			// 填充ChannelWatchInfos
 			channelsWithTimer = append(channelsWithTimer, c.fillChannelWatchInfoWithState(op, state)...)
 		}
 	}
-
+	// 操作etcd
 	err := c.store.Update(updates)
 	if err != nil {
 		log.Warn("fail to update", zap.Array("updates", updates), zap.Error(err))
