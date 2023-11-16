@@ -449,7 +449,9 @@ func (kc *Catalog) DropSegment(ctx context.Context, segment *datapb.SegmentInfo)
 }
 
 func (kc *Catalog) MarkChannelAdded(ctx context.Context, channel string) error {
+	// 构建key的规则:datacoord-meta/channel-removal/{channelName}
 	key := buildChannelRemovePath(channel)
+	// 构建value:NonRemoveFlagTomestone = "non-removed"
 	err := kc.MetaKv.Save(key, NonRemoveFlagTomestone)
 	if err != nil {
 		log.Error("failed to mark channel added", zap.String("channel", channel), zap.Error(err))
