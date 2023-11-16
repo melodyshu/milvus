@@ -280,7 +280,9 @@ func (ss *SuffixSnapshot) Save(key string, value string, ts typeutil.Timestamp) 
 
 	ss.Lock()
 	defer ss.Unlock()
-
+	// key:root-coord/database/db-info/444247969449905601
+	// ts:444248155006173188
+	// tskey:snapshots/root-coord/database/db-info/444247969449905601_ts444248155006173188
 	tsKey := ss.composeTSKey(key, ts)
 
 	// provided key value is latest
@@ -289,7 +291,9 @@ func (ss *SuffixSnapshot) Save(key string, value string, ts typeutil.Timestamp) 
 	if err != nil {
 		return err
 	}
+	// after=true
 	if after {
+		// 走这条路径,操作etcd
 		err := ss.MetaKv.MultiSave(map[string]string{
 			key:   value,
 			tsKey: value,

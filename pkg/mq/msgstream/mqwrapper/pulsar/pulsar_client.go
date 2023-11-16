@@ -70,7 +70,7 @@ func NewClient(tenant string, namespace string, opts pulsar.ClientOptions) (*pul
 func (pc *pulsarClient) CreateProducer(options mqwrapper.ProducerOptions) (mqwrapper.Producer, error) {
 	start := timerecord.NewTimeRecorder("create producer")
 	metrics.MsgStreamOpCounter.WithLabelValues(metrics.CreateProducerLabel, metrics.TotalLabel).Inc()
-
+	// public/default/by-dev-rootcoord-dml_N
 	fullTopicName, err := GetFullTopicName(pc.tenant, pc.namespace, options.Topic)
 	if err != nil {
 		metrics.MsgStreamOpCounter.WithLabelValues(metrics.CreateProducerLabel, metrics.FailLabel).Inc()
@@ -85,7 +85,7 @@ func (pc *pulsarClient) CreateProducer(options mqwrapper.ProducerOptions) (mqwra
 	opts.DisableBatching = true
 	// change the batching max publish delay higher to avoid extra cpu consumption
 	opts.BatchingMaxPublishDelay = 1 * time.Minute
-
+	// 创建topic
 	pp, err := pc.client.CreateProducer(opts)
 	if err != nil {
 		metrics.MsgStreamOpCounter.WithLabelValues(metrics.CreateProducerLabel, metrics.FailLabel).Inc()

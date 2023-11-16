@@ -220,7 +220,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		deleteFunc(buildID)
 		return true
 	}
-
+	// 有一个定时器，默认1秒，配置项indexCoord.scheduler.interval
 	switch state {
 	case indexTaskInit:
 		segment := ib.meta.GetSegment(meta.SegmentID)
@@ -262,7 +262,9 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 			log.Ctx(ib.ctx).Warn("index builder update index version failed", zap.Int64("build", buildID), zap.Error(err))
 			return false
 		}
-
+		// binLogs为向量数据文件的位置信息
+		// files/insert_log/444517122896489678/444517122896489679/444517122896489694/102/444517122896236031
+		// files/insert_log/{collectionID}/{partitionID}/{segmentID}/{fieldID}/444517122896236031
 		binLogs := make([]string, 0)
 		fieldID := ib.meta.GetFieldIDByIndexID(meta.CollectionID, meta.IndexID)
 		for _, fieldBinLog := range segment.GetBinlogs() {
@@ -277,6 +279,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		typeParams := ib.meta.GetTypeParams(meta.CollectionID, meta.IndexID)
 
 		var storageConfig *indexpb.StorageConfig
+		// 获取元数据存储类型：minio
 		if Params.CommonCfg.StorageType.GetValue() == "local" {
 			storageConfig = &indexpb.StorageConfig{
 				RootPath:    Params.LocalStorageCfg.Path.GetValue(),
@@ -311,6 +314,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 			NumRows:             meta.NumRows,
 			CurrentIndexVersion: ib.indexEngineVersionManager.GetCurrentIndexEngineVersion(),
 		}
+		// 通知IndexNode创建索引
 		if err := ib.assignTask(client, req); err != nil {
 			// need to release lock then reassign, so set task state to retry
 			log.Ctx(ib.ctx).Warn("index builder assign task to IndexNode failed", zap.Int64("buildID", buildID),
@@ -321,6 +325,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		log.Ctx(ib.ctx).Info("index task assigned successfully", zap.Int64("buildID", buildID),
 			zap.Int64("segmentID", meta.SegmentID), zap.Int64("nodeID", nodeID))
 		// update index meta state to InProgress
+		// 更新索引状态
 		if err := ib.meta.BuildIndex(buildID); err != nil {
 			// need to release lock then reassign, so set task state to retry
 			log.Ctx(ib.ctx).Warn("index builder update index meta to InProgress failed", zap.Int64("buildID", buildID),

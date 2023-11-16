@@ -622,7 +622,7 @@ func (mt *MetaTable) ListAllAvailCollections(ctx context.Context) map[int64][]in
 func (mt *MetaTable) ListCollections(ctx context.Context, dbName string, ts Timestamp, onlyAvail bool) ([]*model.Collection, error) {
 	mt.ddLock.RLock()
 	defer mt.ddLock.RUnlock()
-
+	// 从缓存中取数,避免读取etcd
 	if isMaxTs(ts) {
 		return mt.listCollectionFromCache(dbName, onlyAvail)
 	}

@@ -379,7 +379,7 @@ func (mr *MilvusRoles) Run() {
 	}
 
 	wg.Wait()
-
+	// 读取配置文件切换日志级别
 	mr.setupLogger()
 	tracer.Init()
 

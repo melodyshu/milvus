@@ -123,6 +123,7 @@ func (job *LoadCollectionJob) Execute() error {
 		func(partition *meta.Partition, _ int) int64 {
 			return partition.GetPartitionID()
 		})
+	// 只加载需要加载的partition
 	lackPartitionIDs := lo.FilterMap(partitionIDs, func(partID int64, _ int) (int64, bool) {
 		return partID, !lo.Contains(loadedPartitionIDs, partID)
 	})
@@ -132,7 +133,7 @@ func (job *LoadCollectionJob) Execute() error {
 	job.undo.CollectionID = req.GetCollectionID()
 	job.undo.LackPartitions = lackPartitionIDs
 	log.Info("find partitions to load", zap.Int64s("partitions", lackPartitionIDs))
-
+	// colExisted=false
 	colExisted := job.meta.CollectionManager.Exist(req.GetCollectionID())
 	if !colExisted {
 		// Clear stale replicas, https://github.com/milvus-io/milvus/issues/20444
