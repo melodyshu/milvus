@@ -127,7 +127,7 @@ func (fm *flowgraphManager) addAndStartWithEtcdTickler(dn *DataNode, vchan *data
 		log.Warn("try to add an existed DataSyncService")
 		return nil
 	}
-
+	// 构建dataSyncService结构体
 	dataSyncService, err := newServiceWithEtcdTickler(context.TODO(), dn, &datapb.ChannelWatchInfo{
 		Schema: schema,
 		Vchan:  vchan,
@@ -136,6 +136,7 @@ func (fm *flowgraphManager) addAndStartWithEtcdTickler(dn *DataNode, vchan *data
 		log.Warn("fail to create new DataSyncService", zap.Error(err))
 		return err
 	}
+	// 启动dataSyncService
 	dataSyncService.start()
 	fm.flowgraphs.Insert(vchan.GetChannelName(), dataSyncService)
 

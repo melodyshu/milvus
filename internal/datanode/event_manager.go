@@ -172,12 +172,15 @@ func parseDeleteEventKey(key string) string {
 }
 
 func (node *DataNode) handlePutEvent(watchInfo *datapb.ChannelWatchInfo, version int64) (err error) {
+	// 获取虚拟channel名称,例如:by-dev-rootcoord-dml_2_445698762473996462v0
 	vChanName := watchInfo.GetVchan().GetChannelName()
+	// 获取key,例如:channelwatch/7/by-dev-rootcoord-dml_2_445698762473996462v0
 	key := path.Join(Params.CommonCfg.DataCoordWatchSubPath.GetValue(), fmt.Sprintf("%d", node.GetSession().ServerID), vChanName)
 	tickler := newEtcdTickler(version, key, watchInfo, node.watchKv, Params.DataNodeCfg.WatchEventTicklerInterval.GetAsDuration(time.Second))
 
 	switch watchInfo.State {
 	case datapb.ChannelWatchState_Uncomplete, datapb.ChannelWatchState_ToWatch:
+		// 走这条路径
 		if err := node.flowgraphManager.addAndStartWithEtcdTickler(node, watchInfo.GetVchan(), watchInfo.GetSchema(), tickler); err != nil {
 			log.Warn("handle put event: new data sync service failed", zap.String("vChanName", vChanName), zap.Error(err))
 			watchInfo.State = datapb.ChannelWatchState_WatchFailure
