@@ -107,6 +107,7 @@ func (node *DataNode) checkWatchedList() error {
 func (node *DataNode) handleWatchInfo(e *event, key string, data []byte) {
 	switch e.eventType {
 	case putEventType:
+		// 反序列化得到ChannelWatchInfo
 		watchInfo, err := parsePutEventData(data)
 		if err != nil {
 			log.Warn("fail to handle watchInfo", zap.Int("event type", e.eventType), zap.String("key", key), zap.Error(err))
@@ -124,6 +125,7 @@ func (node *DataNode) handleWatchInfo(e *event, key string, data []byte) {
 		}
 
 		e.info = watchInfo
+		// 填充虚拟channel名称
 		e.vChanName = watchInfo.GetVchan().GetChannelName()
 		log.Info("DataNode is handling watchInfo PUT event", zap.String("key", key), zap.Any("watch state", watchInfo.GetState().String()))
 	case deleteEventType:
@@ -134,7 +136,7 @@ func (node *DataNode) handleWatchInfo(e *event, key string, data []byte) {
 	actualManager, loaded := node.eventManagerMap.GetOrInsert(e.vChanName, newChannelEventManager(
 		node.handlePutEvent, node.handleDeleteEvent, retryWatchInterval,
 	))
-
+	// loaded=false
 	if !loaded {
 		actualManager.Run()
 	}
@@ -249,8 +251,8 @@ func newChannelEventManager(handlePut func(*datapb.ChannelWatchInfo, int64) erro
 	return &channelEventManager{
 		eventChan:         make(chan event, 10),
 		closeChan:         make(chan struct{}),
-		handlePutEvent:    handlePut,
-		handleDeleteEvent: handleDel,
+		handlePutEvent:    handlePut, // 设置PUT处理函数
+		handleDeleteEvent: handleDel, // 设置DELETE处理函数
 		retryInterval:     retryInterval,
 	}
 }
@@ -264,12 +266,14 @@ func (e *channelEventManager) Run() {
 			case event := <-e.eventChan:
 				switch event.eventType {
 				case putEventType:
+					// 处理PUT事件:node.handlePutEvent()
 					err := e.handlePutEvent(event.info, event.version)
 					if err != nil {
 						// logging the error is convenient for follow-up investigation of problems
 						log.Warn("handle put event failed", zap.String("vChanName", event.vChanName), zap.Error(err))
 					}
 				case deleteEventType:
+					// 处理DELETE事件:node.handleDeleteEvent()
 					e.handleDeleteEvent(event.vChanName)
 				}
 			case <-e.closeChan:
