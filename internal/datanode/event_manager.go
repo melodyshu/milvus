@@ -44,8 +44,11 @@ func (node *DataNode) StartWatchChannels(ctx context.Context) {
 	defer logutil.LogPanic()
 	// REF MEP#7 watch path should be [prefix]/channel/{node_id}/{channel_name}
 	// TODO, this is risky, we'd better watch etcd with revision rather simply a path
+	// 构建key的规则:channelwatch/{nodeID}
 	watchPrefix := path.Join(Params.CommonCfg.DataCoordWatchSubPath.GetValue(), fmt.Sprintf("%d", node.GetSession().ServerID))
 	log.Info("Start watch channel", zap.String("prefix", watchPrefix))
+	// 在etcd上watch key,例如:channelwatch/5
+	// 创建collection会产生key:channelwatch/{nodeID}/{chName}
 	evtChan := node.watchKv.WatchWithPrefix(watchPrefix)
 	// after watch, first check all exists nodes first
 	err := node.checkWatchedList()
@@ -53,6 +56,7 @@ func (node *DataNode) StartWatchChannels(ctx context.Context) {
 		log.Warn("StartWatchChannels failed", zap.Error(err))
 		return
 	}
+	// 处理watch事件
 	for {
 		select {
 		case <-ctx.Done():
@@ -76,6 +80,7 @@ func (node *DataNode) StartWatchChannels(ctx context.Context) {
 				log.Panic("datanode is not functional for event canceled", zap.Error(err))
 				return
 			}
+			// 处理watch的event
 			for _, evt := range event.Events {
 				// We need to stay in order until events enqueued
 				node.handleChannelEvt(evt)

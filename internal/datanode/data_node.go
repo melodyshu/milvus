@@ -266,6 +266,7 @@ func (node *DataNode) Init() error {
 // handleChannelEvt handles event from kv watch event
 func (node *DataNode) handleChannelEvt(evt *clientv3.Event) {
 	var e *event
+	// 根据type填充event
 	switch evt.Type {
 	case clientv3.EventTypePut: // datacoord shall put channels needs to be watched here
 		e = &event{
