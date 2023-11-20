@@ -237,12 +237,16 @@ func (kc *Catalog) CreatePartition(ctx context.Context, dbID int64, partition *m
 
 	if partitionVersionAfter210(collMeta) {
 		// save to newly path.
+		// 走这条路径
+		// 构建key的规则
 		k := BuildPartitionKey(partition.CollectionID, partition.PartitionID)
 		partitionInfo := model.MarshalPartitionModel(partition)
+		// 序列化
 		v, err := proto.Marshal(partitionInfo)
 		if err != nil {
 			return err
 		}
+		// 写入etcd
 		return kc.Snapshot.Save(k, string(v), ts)
 	}
 
