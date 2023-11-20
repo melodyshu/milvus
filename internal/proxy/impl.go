@@ -1084,7 +1084,7 @@ func (node *Proxy) CreatePartition(ctx context.Context, request *milvuspb.Create
 		zap.String("collection", request.CollectionName),
 		zap.String("partition", request.PartitionName))
 
-	log.Debug(rpcReceived(method))
+	log.Info(rpcReceived(method))
 
 	if err := node.sched.ddQueue.Enqueue(cpt); err != nil {
 		log.Warn(
@@ -1096,7 +1096,7 @@ func (node *Proxy) CreatePartition(ctx context.Context, request *milvuspb.Create
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcEnqueued(method),
 		zap.Uint64("BeginTS", cpt.BeginTs()),
 		zap.Uint64("EndTS", cpt.EndTs()))
@@ -1113,7 +1113,7 @@ func (node *Proxy) CreatePartition(ctx context.Context, request *milvuspb.Create
 		return merr.Status(err), nil
 	}
 
-	log.Debug(
+	log.Info(
 		rpcDone(method),
 		zap.Uint64("BeginTS", cpt.BeginTs()),
 		zap.Uint64("EndTS", cpt.EndTs()))
