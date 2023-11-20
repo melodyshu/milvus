@@ -60,11 +60,13 @@ func (t *createPartitionTask) Execute(ctx context.Context) error {
 		return fmt.Errorf("partition number (%d) exceeds max configuration (%d), collection: %s",
 			len(t.collMeta.Partitions), cfgMaxPartitionNum, t.collMeta.Name)
 	}
-
+	// 分配partID
 	partID, err := t.core.idAllocator.AllocOne()
 	if err != nil {
 		return err
 	}
+	// 构建partition结构体
+	// 包含partID,partName,collectID等
 	partition := &model.Partition{
 		PartitionID:               partID,
 		PartitionName:             t.Req.GetPartitionName(),
@@ -75,7 +77,8 @@ func (t *createPartitionTask) Execute(ctx context.Context) error {
 	}
 
 	undoTask := newBaseUndoTask(t.core.stepExecutor)
-
+	// 分为多个step执行，每一个undoTask由todoStep和undoStep构成
+	// 执行todoStep,报错则执行undoStep
 	undoTask.AddStep(&expireCacheStep{
 		baseStep:        baseStep{core: t.core},
 		dbName:          t.Req.GetDbName(),
@@ -83,7 +86,7 @@ func (t *createPartitionTask) Execute(ctx context.Context) error {
 		collectionID:    t.collMeta.CollectionID,
 		ts:              t.GetTs(),
 	}, &nullStep{})
-
+	// 添加partition元数据
 	undoTask.AddStep(&addPartitionMetaStep{
 		baseStep:  baseStep{core: t.core},
 		partition: partition,
