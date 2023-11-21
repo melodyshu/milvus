@@ -76,7 +76,7 @@ func (job *SyncNewCreatedPartitionJob) Execute() error {
 	if partition := job.meta.GetPartition(job.req.GetPartitionID()); partition != nil {
 		return nil
 	}
-
+	// 加载partition,因为collection是load状态,新添加的partition也需要加载
 	err := loadPartitions(job.ctx, job.meta, job.cluster, job.broker, false, req.GetCollectionID(), req.GetPartitionID())
 	if err != nil {
 		return err
