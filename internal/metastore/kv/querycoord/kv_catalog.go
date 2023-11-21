@@ -48,6 +48,7 @@ func (s Catalog) SaveCollection(collection *querypb.CollectionLoadInfo, partitio
 
 func (s Catalog) SavePartition(info ...*querypb.PartitionLoadInfo) error {
 	for _, partition := range info {
+		// querycoord-partition-loadinfo/collectionID/partitionID
 		k := EncodePartitionLoadInfoKey(partition.GetCollectionID(), partition.GetPartitionID())
 		v, err := proto.Marshal(partition)
 		if err != nil {
