@@ -103,13 +103,12 @@ func (t *createPartitionTask) Execute(ctx context.Context) error {
 		collectionID: t.collMeta.CollectionID,
 		partitionIDs: []int64{partID},
 	})
-
+	// 同样也是添加partition元数据,侧重于load后的partition
 	undoTask.AddStep(&syncNewCreatedPartitionStep{
 		baseStep:     baseStep{core: t.core},
 		collectionID: t.collMeta.CollectionID,
 		partitionID:  partID,
 	}, &nullStep{})
-
 	undoTask.AddStep(&changePartitionStateStep{
 		baseStep:     baseStep{core: t.core},
 		collectionID: t.collMeta.CollectionID,
