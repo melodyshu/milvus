@@ -65,6 +65,8 @@ func (job *SyncNewCreatedPartitionJob) Execute() error {
 	)
 
 	// check if collection not load or loadType is loadPartition
+	// collection如果未load,则返回nil
+	// collection如果已经load,则下一步
 	collection := job.meta.GetCollection(job.req.GetCollectionID())
 	if collection == nil || collection.GetLoadType() == querypb.LoadType_LoadPartition {
 		return nil
