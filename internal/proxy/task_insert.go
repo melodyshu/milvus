@@ -231,7 +231,9 @@ func (it *insertTask) Execute(ctx context.Context) error {
 		return err
 	}
 	getMsgStreamDur := tr.RecordSpan()
-
+	// by-dev-rootcoord-dml_0_445811557825249939v0
+	// by-dev-rootcoord-dml_1_445811557825249939v1
+	// 如果shardNum=2,则获取2个虚拟channel
 	channelNames, err := it.chMgr.getVChannels(collID)
 	if err != nil {
 		log.Warn("get vChannels failed", zap.Int64("collectionID", collID), zap.Error(err))
