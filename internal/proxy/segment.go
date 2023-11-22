@@ -392,6 +392,7 @@ func (sa *segIDAssigner) GetSegmentID(collID UniqueID, partitionID UniqueID, cha
 		count:       count,
 		timestamp:   ts,
 	}
+	// cached_allocator.go:first := <-ta.Reqs
 	sa.Reqs <- req
 	if err := req.Wait(); err != nil {
 		return nil, fmt.Errorf("getSegmentID failed: %s", err)
