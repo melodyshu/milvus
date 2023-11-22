@@ -213,8 +213,8 @@ func (it *insertTask) Execute(ctx context.Context) error {
 	defer sp.End()
 
 	tr := timerecord.NewTimeRecorder(fmt.Sprintf("proxy execute insert %d", it.ID()))
-
 	collectionName := it.insertMsg.CollectionName
+	// 根据collectionName得到collectionID
 	collID, err := globalMetaCache.GetCollectionID(it.ctx, it.insertMsg.GetDbName(), collectionName)
 	log := log.Ctx(ctx)
 	if err != nil {
@@ -224,6 +224,8 @@ func (it *insertTask) Execute(ctx context.Context) error {
 	it.insertMsg.CollectionID = collID
 
 	getCacheDur := tr.RecordSpan()
+	// mqMsgStream
+	// 得到stream
 	stream, err := it.chMgr.getOrCreateDmlStream(collID)
 	if err != nil {
 		return err
