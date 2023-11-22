@@ -281,6 +281,7 @@ func (ms *mqMsgStream) Produce(msgPack *MsgPack) error {
 	var result map[int32]*MsgPack
 	var err error
 	if ms.repackFunc != nil {
+		// 使用proxy.defaultInsertRepackFunc重新打包
 		result, err = ms.repackFunc(tsMsgs, reBucketValues)
 	} else {
 		msgType := (tsMsgs[0]).Type()

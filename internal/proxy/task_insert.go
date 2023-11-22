@@ -224,8 +224,7 @@ func (it *insertTask) Execute(ctx context.Context) error {
 	it.insertMsg.CollectionID = collID
 
 	getCacheDur := tr.RecordSpan()
-	// mqMsgStream
-	// 得到stream
+	// 得到stream,类型为mqMsgStream
 	stream, err := it.chMgr.getOrCreateDmlStream(collID)
 	if err != nil {
 		return err
@@ -254,6 +253,7 @@ func (it *insertTask) Execute(ctx context.Context) error {
 	var msgPack *msgstream.MsgPack
 	if it.partitionKeys == nil {
 		// 分配segmentID
+		// 重新打包为2个msgstream.TsMsg,分别发送给2个虚拟通道
 		msgPack, err = repackInsertData(it.TraceCtx(), channelNames, it.insertMsg, it.result, it.idAllocator, it.segIDAssigner)
 	} else {
 		msgPack, err = repackInsertDataWithPartitionKey(it.TraceCtx(), channelNames, it.partitionKeys, it.insertMsg, it.result, it.idAllocator, it.segIDAssigner)
