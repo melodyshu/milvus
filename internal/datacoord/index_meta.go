@@ -197,7 +197,7 @@ func (m *meta) CreateIndex(index *model.Index) error {
 		zap.Int64("fieldID", index.FieldID), zap.Int64("indexID", index.IndexID), zap.String("indexName", index.IndexName))
 	m.Lock()
 	defer m.Unlock()
-
+	// 写入etcd元数据
 	if err := m.catalog.CreateIndex(m.ctx, index); err != nil {
 		log.Error("meta update: CreateIndex save meta fail", zap.Int64("collectionID", index.CollectionID),
 			zap.Int64("fieldID", index.FieldID), zap.Int64("indexID", index.IndexID),
