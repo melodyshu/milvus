@@ -235,6 +235,7 @@ func (ib *indexBuilder) process(buildID UniqueID) bool {
 		}
 		indexParams := ib.meta.GetIndexParams(meta.CollectionID, meta.IndexID)
 		if isFlatIndex(getIndexType(indexParams)) || meta.NumRows < Params.DataCoordCfg.MinSegmentNumRowsToEnableIndex.GetAsInt64() {
+			// 数量小于最低数量无需建立索引,默认为1024
 			log.Ctx(ib.ctx).Info("segment does not need index really", zap.Int64("buildID", buildID),
 				zap.Int64("segmentID", meta.SegmentID), zap.Int64("num rows", meta.NumRows))
 			if err := ib.meta.FinishTask(&indexpb.IndexTaskInfo{
