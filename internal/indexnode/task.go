@@ -345,7 +345,7 @@ func (it *indexBuildTask) BuildIndex(ctx context.Context) error {
 		log.Ctx(ctx).Warn("append index engine version failed", zap.Error(err))
 		return err
 	}
-
+	// cgo层调用CreateIndex()
 	it.index, err = indexcgowrapper.CreateIndex(ctx, buildIndexInfo)
 	if err != nil {
 		if it.index != nil && it.index.CleanLocalData() != nil {
