@@ -346,6 +346,7 @@ func (it *indexBuildTask) BuildIndex(ctx context.Context) error {
 		return err
 	}
 	// cgo层调用CreateIndex()
+	// it.index有个Upload()方法写入s3(SaveIndexFiles方法里调用it.index.Upload()写入s3)
 	it.index, err = indexcgowrapper.CreateIndex(ctx, buildIndexInfo)
 	if err != nil {
 		if it.index != nil && it.index.CleanLocalData() != nil {
@@ -370,7 +371,7 @@ func (it *indexBuildTask) SaveIndexFiles(ctx context.Context) error {
 			log.Ctx(ctx).Error("IndexNode indexBuildTask Execute CIndexDelete failed", zap.Error(err))
 		}
 	}
-	// 上传索引文件到s3
+	// c++层上传索引文件到s3
 	indexFilePath2Size, err := it.index.UpLoad()
 	if err != nil {
 		log.Ctx(ctx).Error("failed to upload index", zap.Error(err))
