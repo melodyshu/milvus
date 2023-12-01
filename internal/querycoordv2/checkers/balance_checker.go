@@ -130,6 +130,7 @@ func (b *BalanceChecker) balanceReplicas(replicaIDs []int64) ([]balance.SegmentA
 		if replica == nil {
 			continue
 		}
+		// Balance为ScoreBasedBalancer
 		sPlans, cPlans := b.Balance.BalanceReplica(replica)
 		segmentPlans = append(segmentPlans, sPlans...)
 		channelPlans = append(channelPlans, cPlans...)
