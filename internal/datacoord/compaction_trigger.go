@@ -118,8 +118,10 @@ func (t *compactionTrigger) start() {
 			case signal := <-t.signals:
 				switch {
 				case signal.isGlobal:
+					// 全局信号
 					t.handleGlobalSignal(signal)
 				default:
+					// collection级别信号
 					t.handleSignal(signal)
 					// shouldn't reset, otherwise a frequent flushed collection will affect other collections
 					// t.globalTrigger.Reset(Params.DataCoordCfg.GlobalCompactionInterval)
