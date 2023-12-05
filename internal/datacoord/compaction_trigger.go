@@ -129,7 +129,7 @@ func (t *compactionTrigger) start() {
 			}
 		}
 	}()
-
+	// 触发全局compaction信号
 	go t.startGlobalCompactionLoop()
 }
 
