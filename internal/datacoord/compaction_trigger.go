@@ -338,7 +338,9 @@ func (t *compactionTrigger) handleGlobalSignal(signal *compactionSignal) {
 	defer t.forceMu.Unlock()
 
 	log := log.With(zap.Int64("compactionID", signal.id))
+	// 返回Channel-Partition维度的segment
 	m := t.meta.GetSegmentsChanPart(func(segment *SegmentInfo) bool {
+		// segment选择器(选择算法)
 		return (signal.collectionID == 0 || segment.CollectionID == signal.collectionID) &&
 			isSegmentHealthy(segment) &&
 			isFlush(segment) &&
@@ -399,7 +401,7 @@ func (t *compactionTrigger) handleGlobalSignal(signal *compactionSignal) {
 				zap.String("channel", group.channelName))
 			return
 		}
-
+		// 寻找需要compaction的segment
 		plans := t.generatePlans(group.segments, signal.isForce, isDiskIndex, ct)
 		for _, plan := range plans {
 			segIDs := fetchSegIDs(plan.GetSegmentBinlogs())
