@@ -420,6 +420,7 @@ func (t *compactionTrigger) handleGlobalSignal(signal *compactionSignal) {
 					zap.Error(err))
 				continue
 			}
+			// 执行compaction
 			err := t.compactionHandler.execCompactionPlan(signal, plan)
 			if err != nil {
 				log.Warn("failed to execute compaction plan",
