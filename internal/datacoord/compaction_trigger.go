@@ -401,7 +401,7 @@ func (t *compactionTrigger) handleGlobalSignal(signal *compactionSignal) {
 				zap.String("channel", group.channelName))
 			return
 		}
-		// 寻找需要compaction的segment
+		// 寻找需要compaction的segment,产生合并plan
 		plans := t.generatePlans(group.segments, signal.isForce, isDiskIndex, ct)
 		for _, plan := range plans {
 			segIDs := fetchSegIDs(plan.GetSegmentBinlogs())
