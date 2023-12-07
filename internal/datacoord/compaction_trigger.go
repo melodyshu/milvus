@@ -661,6 +661,7 @@ func (t *compactionTrigger) generatePlans(segments []*SegmentInfo, force bool, i
 		// MinSegmentToMerge默认为3
 		if len(bucket) >= Params.DataCoordCfg.MinSegmentToMerge.GetAsInt() ||
 			len(bucket) > 1 && t.isCompactableSegment(targetRow, segment) {
+			// 产生plan
 			plan := segmentsToPlan(bucket, compactTime)
 			log.Info("generate a plan for small candidates",
 				zap.Int64s("plan segmentIDs", lo.Map(bucket, getSegmentIDs)),
