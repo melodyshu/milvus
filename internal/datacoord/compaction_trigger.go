@@ -118,7 +118,7 @@ func (t *compactionTrigger) start() {
 			case signal := <-t.signals:
 				switch {
 				case signal.isGlobal:
-					// 全局信号
+					// 处理全局compaction信号
 					t.handleGlobalSignal(signal)
 				default:
 					// collection级别信号
