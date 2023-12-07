@@ -637,6 +637,7 @@ func (t *compactionTrigger) generatePlans(segments []*SegmentInfo, force bool, i
 		// pop out the first element
 		segment := smallCandidates[0]
 		bucket = append(bucket, segment)
+		// 下标为0的是最大的segment
 		smallCandidates = smallCandidates[1:]
 
 		var result []*SegmentInfo
@@ -644,6 +645,8 @@ func (t *compactionTrigger) generatePlans(segments []*SegmentInfo, force bool, i
 		// for small segment merge, we pick one largest segment and merge as much as small segment together with it
 		// Why reverse?	 try to merge as many segments as expected.
 		// for instance, if a 255M and 255M is the largest small candidates, they will never be merged because of the MinSegmentToMerge limit.
+		// result为需要合并的segments
+		// MaxSegmentToMerge默认为30
 		smallCandidates, result, _ = reverseGreedySelect(smallCandidates, free, Params.DataCoordCfg.MaxSegmentToMerge.GetAsInt()-1)
 		bucket = append(bucket, result...)
 
