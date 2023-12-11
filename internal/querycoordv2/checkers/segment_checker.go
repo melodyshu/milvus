@@ -72,6 +72,7 @@ func (c *SegmentChecker) readyToCheck(collectionID int64) bool {
 }
 
 func (c *SegmentChecker) Check(ctx context.Context) []task.Task {
+	// 返回的是loaded的collection
 	collectionIDs := c.meta.CollectionManager.GetAll()
 	results := make([]task.Task, 0)
 	for _, cid := range collectionIDs {
