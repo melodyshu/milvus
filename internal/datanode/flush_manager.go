@@ -540,9 +540,9 @@ func (m *rendezvousFlushManager) flushDelData(data *DelDataBuf, segmentID Unique
 	if err != nil {
 		return err
 	}
-
+	// 编码解码器,提供序列化,反序列化功能
 	delCodec := storage.NewDeleteCodec()
-
+	// 序列化
 	blob, err := delCodec.Serialize(collID, partID, segmentID, data.delData)
 	if err != nil {
 		return err
@@ -556,6 +556,7 @@ func (m *rendezvousFlushManager) flushDelData(data *DelDataBuf, segmentID Unique
 
 	blobKey := metautil.JoinIDPath(collID, partID, segmentID, logID)
 	blobPath := path.Join(m.ChunkManager.RootPath(), common.SegmentDeltaLogPath, blobKey)
+	// 合成kvs
 	kvs := map[string][]byte{blobPath: blob.Value[:]}
 	data.LogSize = int64(len(blob.Value))
 	data.LogPath = blobPath
