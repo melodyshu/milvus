@@ -129,11 +129,13 @@ func (m *DeltaBufferManager) deleteFromHeap(buffer *DelDataBuf) {
 func (m *DeltaBufferManager) StoreNewDeletes(segID UniqueID, pks []primaryKey,
 	tss []Timestamp, tr TimeRange, startPos, endPos *msgpb.MsgPosition,
 ) {
+	// 获取delDataBuf
 	buffer, loaded := m.Load(segID)
+	// 如果不存在则新建
 	if !loaded {
 		buffer = newDelDataBuf(segID)
 	}
-
+	// 将pks存入buffer
 	size := buffer.Buffer(pks, tss, tr, startPos, endPos)
 
 	m.pushOrFixHeap(segID, buffer)
