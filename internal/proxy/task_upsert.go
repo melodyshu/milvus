@@ -513,20 +513,23 @@ func (it *upsertTask) Execute(ctx context.Context) (err error) {
 	log := log.Ctx(ctx).With(zap.String("collectionName", it.req.CollectionName))
 
 	tr := timerecord.NewTimeRecorder(fmt.Sprintf("proxy execute upsert %d", it.ID()))
+	// 拿到stream,类型为msgstream.mqMsgStream
 	stream, err := it.chMgr.getOrCreateDmlStream(it.collectionID)
 	if err != nil {
 		return err
 	}
+	// 创建msgPack
 	msgPack := &msgstream.MsgPack{
 		BeginTs: it.BeginTs(),
 		EndTs:   it.EndTs(),
 	}
+	// 添加insertMsgPack
 	err = it.insertExecute(ctx, msgPack)
 	if err != nil {
 		log.Warn("Fail to insertExecute", zap.Error(err))
 		return err
 	}
-
+	// 添加deleteMsgPack
 	err = it.deleteExecute(ctx, msgPack)
 	if err != nil {
 		log.Warn("Fail to deleteExecute", zap.Error(err))
@@ -534,6 +537,7 @@ func (it *upsertTask) Execute(ctx context.Context) (err error) {
 	}
 
 	tr.RecordSpan()
+	// 发送数据至mq
 	err = stream.Produce(msgPack)
 	if err != nil {
 		it.result.Status = merr.Status(err)
